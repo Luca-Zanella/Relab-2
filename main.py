@@ -1,12 +1,13 @@
 # main.py
 
 from dns import exception
-from flask import Flask
+from flask import Flask, send_file
 from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import certifi
+from pymongo.message import query
 
 app = Flask(__name__)
 
@@ -24,6 +25,10 @@ CORS(app)
 def index():
     return "Hello world!"
 
+@app.route("/books")
+def books():
+    return send_file('books.json')
+
 # Questa route effettua una find() su tutto il DB (si limita ai primi 100 risultati)
 
 @app.route('/addresses', methods=['GET'])
@@ -36,6 +41,29 @@ def get_all_addresses():
         return jsonify({'result': output})
     except ValueError:
         print(ValueError)
+
+@app.route('/ci_vettore/<foglio>', methods=['GET'])
+def get_vettore(foglio):
+    mil4326WKT = mongo.db.Mil4326WKT
+    output = []
+    query = {
+        "FOGLIO" : foglio
+    }
+    for s in mil4326WKT.find(query):
+        output.append({
+            "INDIRIZZO":s['INDIRIZZO'],
+            "WGS84_X":s["WGS84_X"],
+            "WGS84_Y":s["WGS84_Y"],
+            "CLASSE_ENE":s["CLASSE_ENE"],
+            "EP_H_ND":s["EP_H_ND"],
+            "FOGLIO":s["FOGLIO"],
+            "CI_VETTORE":s['CI_VETTORE']
+        }
+        )
+    return jsonify(output) #Nota che abbiamo eliminato la chiave result perchè i dati sono già formattati
+
+
+
        
 
 # Checks to see if the name of the package is the run as the main package.
