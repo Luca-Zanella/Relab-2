@@ -1,4 +1,4 @@
-import { AfterViewInit } from "@angular/core";
+import { AfterViewInit, Input } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
 import { Component, ViewChild } from '@angular/core';
 import { GoogleMap } from '@angular/google-maps';
@@ -9,13 +9,16 @@ import { Ci_vettore } from "./models/ci_vett.model";
 
 
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterViewInit {
+  @Input() pagina: string;
   title = 'server mappe';
+  //stringa: string = '';
   //Variabile che conterrà i nostri oggetti GeoJson
   geoJsonObject: GeoFeatureCollection;
   //Observable per richiedere al server python i dati sul DB
@@ -25,6 +28,7 @@ export class AppComponent implements AfterViewInit {
   zoom = 8;
   obsCiVett: Observable<Ci_vettore[]>; //Crea un observable per ricevere i vettori energetici
   markerList: google.maps.MarkerOptions[];
+  stringa: string;
 
   constructor(public http: HttpClient) {
     //Facciamo iniettare il modulo HttpClient dal framework Angular (ricordati di importare la libreria)
@@ -42,14 +46,12 @@ export class AppComponent implements AfterViewInit {
   //Una volta che la pagina web è caricata, viene lanciato il metodo ngOnInit scarico i    dati
   //dal server
   ngOnInit() {
+    /*
     this.obsGeoData = this.http.get<GeoFeatureCollection>(
-      'http://127.0.0.1:5000//ci_vettore/50'
+      this.cerca_pagina(this.pagina)
     );
     this.obsGeoData.subscribe(this.prepareData);
-    this.obsCiVett = this.http.get<Ci_vettore[]>(
-      'http://127.0.0.1:5000//ci_vettore/140'
-    );
-    this.obsCiVett.subscribe(this.prepareCiVettData);
+    */
   }
 
   prepareCiVettData = (data: Ci_vettore[]) => {
@@ -66,6 +68,13 @@ export class AppComponent implements AfterViewInit {
       this.markerList.push(m);
     }
   };
+
+  cerca_pagina(pagina){
+    //ricordiamo che se dobbiamo passare un  nuovo url allora dovremmo cambiarlo quando premiamo il bottone
+    let uri =  'http://127.0.0.1:5000//ci_vettore/' + pagina;
+    this.obsCiVett = this.http.get<Ci_vettore[]>(uri);
+    this.obsCiVett.subscribe(this.prepareCiVettData);
+  }
   findImage(label: string): google.maps.Icon {
     if (label.includes('Gas')) {
       return {
@@ -76,6 +85,18 @@ export class AppComponent implements AfterViewInit {
     if (label.includes('elettrica')) {
       return {
         url: './assets/img/electricity.png',
+        scaledSize: new google.maps.Size(32, 32),
+      };
+    }
+    if (label.includes('GPL')) {
+      return {
+        url: './assets/img/gpl.png',
+        scaledSize: new google.maps.Size(32, 32),
+      };
+    }
+    if (label.includes('Biomasse solide')) {
+      return {
+        url: './assets/img/solid-biomas.png',
         scaledSize: new google.maps.Size(32, 32),
       };
     }
