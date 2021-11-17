@@ -30,6 +30,7 @@ export class AppComponent implements AfterViewInit {
   markerList: google.maps.MarkerOptions[];
   stringa: string;
 
+
   constructor(public http: HttpClient) {
     //Facciamo iniettare il modulo HttpClient dal framework Angular (ricordati di importare la libreria)
   }
@@ -61,17 +62,39 @@ export class AppComponent implements AfterViewInit {
       //Per ogni oggetto del vettore creo un Marker
       let m: google.maps.MarkerOptions = {
         position: new google.maps.LatLng(iterator.WGS84_X, iterator.WGS84_Y),
-        //label: iterator.CI_VETTORE,
         icon: this.findImage(iterator.CI_VETTORE),
       };
       //Marker(iterator.WGS84_X,iterator.WGS84_Y,iterator.CI_VETTORE);
       this.markerList.push(m);
     }
+    this.center = this.LatLngMedia(data);
   };
 
-  cerca_pagina(pagina){
+  LatLngMedia(data: Ci_vettore[]): google.maps.LatLngLiteral {
+  
+    
+    var x = 0;
+    var media_latitudine = 0;
+    var media_longitudine = 0;
+    for(var i of data){
+      //console.log(i.WGS84_X,i.WGS84_Y);
+      media_latitudine += Number(i.WGS84_X);
+      media_longitudine += Number(i.WGS84_Y);
+      x += 1
+    }
+    //media_latitudine = media_latitudine / x
+    console.log(media_latitudine / x);
+    console.log(media_longitudine / x);
+    return {lat :media_latitudine / x, lng : media_longitudine / x}
+    
+   
+    //TODO : IMPLEMENTA IL METODO CHE CALCOLA LATITUDINE E LONGITUDINE MEDIA
+    //NOTA: IL CAMPO WGS84_X contiene la latitudine
+  }
+
+  cerca_pagina(pagina) {
     //ricordiamo che se dobbiamo passare un  nuovo url allora dovremmo cambiarlo quando premiamo il bottone
-    let uri =  'http://127.0.0.1:5000//ci_vettore/' + pagina;
+    let uri = 'http://127.0.0.1:5000//ci_vettore/' + pagina;
     this.obsCiVett = this.http.get<Ci_vettore[]>(uri);
     this.obsCiVett.subscribe(this.prepareCiVettData);
   }

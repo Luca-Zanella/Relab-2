@@ -1,13 +1,9 @@
 # main.py
-
-from dns import exception
 from flask import Flask, send_file
 from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
-import certifi
-from pymongo.message import query
 
 app = Flask(__name__)
 
