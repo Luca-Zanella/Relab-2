@@ -2,8 +2,16 @@
 <input type="text" name="pagina" #pagina>
 <!--Ricordiamo che per prendere il valore del testo dobbiamo mettere punto value che si riferisce a #pagina-->
 <button (click)="cerca_pagina(pagina.value)">Clicca</button>
-<google-map  #mapRef [center]="center" [zoom]="zoom" [width]="1000">  
 
-    <map-marker *ngFor="let markerOption of markerList" [options] = "markerOption">
-</map-marker>
+
+<google-map (mapClick)="mapClicked($event)" #mapRef [center]="center" [zoom]="zoom" [width]="1000">
+  <map-marker *ngFor="let markerOption of markerList" [options]="markerOption">
+  </map-marker>
+   <map-circle
+    (circleRightclick) = circleRightClicked($event)
+    [center]="center_circle"
+    [options] = circleOptions>
+  </map-circle>  
+ 
 </google-map>
+

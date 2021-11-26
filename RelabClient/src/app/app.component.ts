@@ -1,7 +1,7 @@
 import { AfterViewInit, Input } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
 import { Component, ViewChild } from '@angular/core';
-import { GoogleMap } from '@angular/google-maps';
+import { GoogleMap, MapCircle } from '@angular/google-maps';
 import { Observable } from 'rxjs';
 import { GeoFeatureCollection } from './models/geojson.model';
 import { Ci_vettore } from "./models/ci_vett.model";
@@ -30,7 +30,6 @@ export class AppComponent implements AfterViewInit {
   markerList: google.maps.MarkerOptions[];
   stringa: string;
 
-
   constructor(public http: HttpClient) {
     //Facciamo iniettare il modulo HttpClient dal framework Angular (ricordati di importare la libreria)
   }
@@ -47,12 +46,13 @@ export class AppComponent implements AfterViewInit {
   //Una volta che la pagina web è caricata, viene lanciato il metodo ngOnInit scarico i    dati
   //dal server
   ngOnInit() {
-    /*
-    this.obsGeoData = this.http.get<GeoFeatureCollection>(
-      this.cerca_pagina(this.pagina)
-    );
-    this.obsGeoData.subscribe(this.prepareData);
-    */
+    this.circleOptions = {
+      fillColor: 'red',
+      clickable: true,
+      editable: true,
+      radius: 200,
+      visible: false,
+    };
   }
 
   prepareCiVettData = (data: Ci_vettore[]) => {
@@ -71,25 +71,44 @@ export class AppComponent implements AfterViewInit {
   };
 
   LatLngMedia(data: Ci_vettore[]): google.maps.LatLngLiteral {
-  
-    
     var x = 0;
     var media_latitudine = 0;
     var media_longitudine = 0;
-    for(var i of data){
+    for (var i of data) {
       //console.log(i.WGS84_X,i.WGS84_Y);
       media_latitudine += Number(i.WGS84_X);
       media_longitudine += Number(i.WGS84_Y);
-      x += 1
+      x += 1;
     }
     //media_latitudine = media_latitudine / x
     console.log(media_latitudine / x);
     console.log(media_longitudine / x);
-    return {lat :media_latitudine / x, lng : media_longitudine / x}
-    
-   
+    return { lat: media_latitudine / x, lng: media_longitudine / x };
+
     //TODO : IMPLEMENTA IL METODO CHE CALCOLA LATITUDINE E LONGITUDINE MEDIA
     //NOTA: IL CAMPO WGS84_X contiene la latitudine
+  }
+  center_circle: google.maps.LatLngLiteral;
+  circleOptions: google.maps.CircleOptions;
+  //Aggiungi il gestore del metodo mapClicked
+  @ViewChild(MapCircle) circleRef: MapCircle;
+  mapClicked($event: google.maps.MapMouseEvent) {
+    console.log($event);
+    let coords = $event.latLng; //Queste sono le coordinate cliccate
+    this.center = { lat: coords.lat(), lng: coords.lng() };
+    this.center_circle = { lat: coords.lat(), lng: coords.lng() };
+    this.circleOptions = {
+      fillColor: 'red',
+      clickable: true,
+      editable: true,
+      radius: 100000,
+      visible: true,
+    };
+  }
+  circleRightClicked($event: google.maps.MapMouseEvent) {
+    console.log((this.circleRef.getRadius() * 0.00001) / 1.1132);
+    console.log(this.circleRef.getCenter());
+    this.circleRef.circle?.setVisible(false);
   }
 
   cerca_pagina(pagina) {
